@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.1'
+	id 'io.spring.dependency-management' version '1.1.5'
+}
+
+group = 'com.sparta'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	all {
+		exclude group: 'commons-logging', module: 'commons-logging'
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// Spring Batch 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	testImplementation 'org.springframework.batch:spring-batch-test'
+
+	// Spring Data JPA 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// MySQL JDBC 드라이버
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Spring Boot DevTools (개발용)
+	// developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	// JUnit 플랫폼 런처 (테스트용)
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JWT 관련 의존성 (필요시 사용)
+	//implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	//implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	//implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// 추가적으로 필요한 의존성 (필요에 따라 추가)
+	// implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
