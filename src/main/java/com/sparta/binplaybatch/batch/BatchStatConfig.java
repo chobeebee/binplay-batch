@@ -14,7 +14,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
@@ -29,7 +28,6 @@ public class BatchStatConfig {
     private final BatchStatisticService batchStatisticService;
 
     @Bean
-    @Lazy
     public Job statVideoJob(JobCompletionNotificationListener listener, Step statVideoStep) {
         return new JobBuilder("statVideoJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -39,14 +37,12 @@ public class BatchStatConfig {
     }
 
     @Bean
-    @Lazy
     public Step statVideoStep() {
         return new StepBuilder("statVideoStep", jobRepository)
                 .tasklet(statVideoTasklet(), transactionManager).build();
     }
 
     @Bean
-    @Lazy
     public Tasklet statVideoTasklet() {
         return (contribution, chunkContext) -> {
             // 1일 비디오 통계
