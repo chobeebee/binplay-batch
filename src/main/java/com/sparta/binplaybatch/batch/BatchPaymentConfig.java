@@ -45,7 +45,8 @@ public class BatchPaymentConfig {
     public Tasklet paymentVideoTasklet() {
         return (contribution, chunkContext) -> {
             // 1일 비디오 정산
-            batchPaymentService.calculateVideoPmt(LocalDate.now().minusDays(1));
+            //batchPaymentService.calculateVideoPmt(LocalDate.now().minusDays(1));
+            batchPaymentService.calculateVideoPmt(LocalDate.now());
             return RepeatStatus.FINISHED;
         };
     }
@@ -69,7 +70,8 @@ public class BatchPaymentConfig {
     public Tasklet paymentAdTasklet() {
         return (contribution, chunkContext) -> {
             // 1일 광고 정산
-            batchPaymentService.calculateAdPmt(LocalDate.now().minusDays(1));
+            //batchPaymentService.calculateAdPmt(LocalDate.now().minusDays(1));
+            batchPaymentService.calculateAdPmt(LocalDate.now());
             return RepeatStatus.FINISHED;
         };
     }

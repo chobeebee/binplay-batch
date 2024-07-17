@@ -80,7 +80,7 @@ public class BatchPaymentService {
     }
 
     // 총 금액, 광고 정산, 영상 정산
-    public DailyTotalAmount getDailyTotalPayment(LocalDate date) {
+    /*public DailyTotalAmount getDailyTotalPayment(LocalDate date) {
         double totalVideoAmount = paymentVideoRepository.findAllByCreatedAt(date).stream()
                 .mapToDouble(payment -> Math.floor(payment.getTotalAmount()))
                 .sum();
@@ -96,7 +96,7 @@ public class BatchPaymentService {
                 .totalAdAmount(totalAdAmount)
                 .totalAmount(totalAmount)
                 .build();
-    }
+    }*/
 
     // 비디오 단가
     private double calculateVideoAmount(long viewCount) {
