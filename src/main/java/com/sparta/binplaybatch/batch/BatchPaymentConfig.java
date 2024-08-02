@@ -1,6 +1,7 @@
 package com.sparta.binplaybatch.batch;
 
-import com.sparta.binplaybatch.batch.listener.JobCompletionNotificationListener;
+import com.sparta.binplaybatch.batch.listener.CustomJobListener;
+import com.sparta.binplaybatch.batch.listener.CustomStepListener;
 import com.sparta.binplaybatch.batch.service.BatchPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -22,40 +23,42 @@ import java.time.LocalDate;
 @EnableBatchProcessing
 @RequiredArgsConstructor
 public class BatchPaymentConfig {
+    private final CustomJobListener customJobListener;
+    private final CustomStepListener customStepListener;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final BatchPaymentService batchPaymentService;
 
     @Bean
-    public Job paymentVideoJob(JobCompletionNotificationListener listener, Step paymentVideoStep) {
+    public Job paymentVideoJob(Step paymentVideoStep) {
         return new JobBuilder("paymentVideoJob", jobRepository)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
+                //.incrementer(new RunIdIncrementer())
+                .preventRestart()
+                .listener(customJobListener)
                 .start(paymentVideoStep)
                 .build();
     }
-    
+
     @Bean
     public Step paymentVideoStep() {
         return new StepBuilder("paymentVideoStep", jobRepository)
-                .tasklet(paymentVideoTasklet(), platformTransactionManager).build();
+                .tasklet(paymentVideoTasklet(), platformTransactionManager).listener(customStepListener).build();
     }
 
     @Bean
     public Tasklet paymentVideoTasklet() {
         return (contribution, chunkContext) -> {
             // 1일 비디오 정산
-            //batchPaymentService.calculateVideoPmt(LocalDate.now().minusDays(1));
-            batchPaymentService.calculateVideoPmt(LocalDate.now());
+            batchPaymentService.calculateVideoPmt(LocalDate.now().minusDays(1));
             return RepeatStatus.FINISHED;
         };
     }
 
     @Bean
-    public Job paymentAdJob(JobCompletionNotificationListener listener, Step paymentAdStep) {
+    public Job paymentAdJob(Step paymentAdStep) {
         return new JobBuilder("paymentAdJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .listener(listener)
+                .listener(customJobListener)
                 .start(paymentAdStep)
                 .build();
     }
@@ -63,17 +66,15 @@ public class BatchPaymentConfig {
     @Bean
     public Step paymentAdStep() {
         return new StepBuilder("paymentAdStep", jobRepository)
-                .tasklet(paymentAdTasklet(), platformTransactionManager).build();
+                .tasklet(paymentAdTasklet(), platformTransactionManager).listener(customStepListener).build();
     }
 
     @Bean
     public Tasklet paymentAdTasklet() {
         return (contribution, chunkContext) -> {
             // 1일 광고 정산
-            //batchPaymentService.calculateAdPmt(LocalDate.now().minusDays(1));
-            batchPaymentService.calculateAdPmt(LocalDate.now());
+            batchPaymentService.calculateAdPmt(LocalDate.now().minusDays(1));
             return RepeatStatus.FINISHED;
         };
     }
-
 }

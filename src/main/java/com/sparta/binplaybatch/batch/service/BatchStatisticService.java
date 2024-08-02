@@ -29,7 +29,6 @@ public class BatchStatisticService {
     //1일 비디오 통계
     @Transactional
     public void updateDailyViewVideo(LocalDate date) {
-        //LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
@@ -56,12 +55,10 @@ public class BatchStatisticService {
 
     //1일 광고 통계
     public void updateDailyViewAd(LocalDate date) {
-        //LocalDate today = LocalDate.now();
         List<Object[]> results = adViewRepository.countViews(date);
 
         for (Object[] result : results) {
             VideoAd videoAd = (VideoAd) result[0];
-            //Long videoAd = (Long) result[0];
             Long dailyViewCount = (Long) result[1];
 
             StatisticAd statisticAd = statisticAdRepository.findByVideoAdAndCreatedAt(videoAd, date)
