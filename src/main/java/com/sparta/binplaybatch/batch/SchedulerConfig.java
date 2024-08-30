@@ -11,6 +11,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -18,8 +19,6 @@ import static com.sparta.binplaybatch.batch.listener.CustomJobListener.*;
 
 @Configuration
 @EnableScheduling
-//@RequiredArgsConstructor
-//@Component
 public class SchedulerConfig {
     private final JobLauncher jobLauncher;
     private final Job statVideoJob;
@@ -37,11 +36,11 @@ public class SchedulerConfig {
         this.taskExecutor = taskExecutor;
     }
 
-    @Scheduled(cron = "0 10 0 * * *") //매일 자정 10분에 실행
+    @Scheduled(cron = "0 5 0 * * *") // 매일 00시 5분에 실행
     public void runJobs() {
 
         try {
-            System.out.println("\n[순차] 잡 실행 시작");
+            /*System.out.println("\n[순차] 잡 실행 시작");
 
             JobExecution sequentialExecution1 = runJob(statVideoJob, "순차");
             Objects.requireNonNull(sequentialExecution1).getJobParameters();
@@ -54,7 +53,7 @@ public class SchedulerConfig {
 
             while (sequentialExecution1.isRunning() || sequentialExecution2.isRunning()|| sequentialExecution3.isRunning()|| sequentialExecution4.isRunning()) {
                 Thread.sleep(100);
-            }
+            }*/
 
             System.out.println("[병렬] 잡 실행 시작\n");
 
@@ -91,9 +90,12 @@ public class SchedulerConfig {
 
     private JobExecution runJob(Job job, String mode) {
         try {
+            //LocalDate yesterday = LocalDate.now().minusDays(1);
+            LocalDate yesterday = LocalDate.now();
             JobParameters jobParameters = new JobParametersBuilder()
                     .addString("uuid", UUID.randomUUID().toString())
                     .addString("mode", mode)
+                    .addString("date", yesterday.toString()) // 전날 날짜 추가
                     .toJobParameters();
 
             JobExecution jobExecution = jobLauncher.run(job, jobParameters);
@@ -109,14 +111,15 @@ public class SchedulerConfig {
     }
 
     private void printSummary() {
-        System.out.println("\n=== 배치 Job 병렬처리 테스트 Summary ===");
+        /*System.out.println("\n=== 배치 Job 순차처리 테스트 Summary ===");
         if (sequentialJobCount > 0) {
             System.out.println("순차 총 소요시간: " + sequentialTotalTime + " ms");
-        }
+        }*/
+        System.out.println("\n=== 배치 Job 병렬처리 테스트 Summary ===");
         if (parallelStartTime > 0 && parallelEndTime > 0) {
             long parallelTotalTime = parallelEndTime - parallelStartTime;
             System.out.println("병렬 총 소요시간: " + parallelTotalTime + " ms");
         }
-        System.out.println("순차와 병렬의 총 소요시간 차이: " + (parallelEndTime - parallelStartTime - sequentialTotalTime) * (-1) + " ms");
+        //System.out.println("순차와 병렬의 총 소요시간 차이: " + (parallelEndTime - parallelStartTime - sequentialTotalTime) * (-1) + " ms");
     }
 }

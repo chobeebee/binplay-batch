@@ -19,6 +19,19 @@ public class BatchConfig {
         executor.setThreadNamePrefix("batchTaskExecutor-");
         executor.initialize();
 
+        // 실행 중인 스레드 수를 주기적으로 로그에 기록
+        /*new Thread(() -> {
+            while (true) {
+                log.info("Active Threads: {}", executor.getActiveCount());
+                log.info("Pool Size: {}", executor.getPoolSize());
+                log.info("Queue Size: {}", executor.getThreadPoolExecutor().getQueue().size());
+                try {
+                    Thread.sleep(1000); // 10초마다 로그 기록
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); break;
+                }
+            }}).start();*/
+
         return executor;
     }
 }

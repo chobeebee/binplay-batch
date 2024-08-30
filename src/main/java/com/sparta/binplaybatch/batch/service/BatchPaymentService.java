@@ -1,3 +1,4 @@
+/*
 package com.sparta.binplaybatch.batch.service;
 
 import com.sparta.binplaybatch.batch.domain.payment.PaymentAd;
@@ -23,6 +24,7 @@ public class BatchPaymentService {
     private final PaymentAdRepository paymentAdRepository;
     private final VideoRepository videoRepository;
     private final VideoAdRepository videoAdRepository;
+
 
     // 1일 비디오 정산
     public void calculateVideoPmt(LocalDate date) {
@@ -78,6 +80,27 @@ public class BatchPaymentService {
         }
     }
 
+    // 총 금액, 광고 정산, 영상 정산
+    */
+/*public DailyTotalAmount getDailyTotalPayment(LocalDate date) {
+        double totalVideoAmount = paymentVideoRepository.findAllByCreatedAt(date).stream()
+                .mapToDouble(payment -> Math.floor(payment.getTotalAmount()))
+                .sum();
+
+        double totalAdAmount = paymentAdRepository.findAllByCreatedAt(date).stream()
+                .mapToDouble(payment -> Math.floor(payment.getTotalAmount()))
+                .sum();
+
+        double totalAmount = totalVideoAmount + totalAdAmount;
+
+        return DailyTotalAmount.builder()
+                .totalVideoAmount(totalVideoAmount)
+                .totalAdAmount(totalAdAmount)
+                .totalAmount(totalAmount)
+                .build();
+    }*//*
+
+
     // 비디오 단가
     private double calculateVideoAmount(long viewCount) {
         if (viewCount < 100000) return viewCount * 1;
@@ -94,3 +117,4 @@ public class BatchPaymentService {
         else return viewCount * 20;
     }
 }
+*/

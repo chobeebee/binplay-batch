@@ -1,8 +1,14 @@
 package com.sparta.binplaybatch.batch;
 
+import com.sparta.binplaybatch.batch.domain.statistic.StatisticAd;
+import com.sparta.binplaybatch.batch.domain.statistic.StatisticVideo;
 import com.sparta.binplaybatch.batch.listener.CustomJobListener;
 import com.sparta.binplaybatch.batch.listener.CustomStepListener;
-import com.sparta.binplaybatch.batch.service.BatchStatisticService;
+import com.sparta.binplaybatch.batch.processor.StatAdProcessor;
+import com.sparta.binplaybatch.batch.processor.StatVideoProcessor;
+import com.sparta.binplaybatch.entity.VideoAd;
+import com.sparta.binplaybatch.entity.Videos;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -11,13 +17,14 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.time.LocalDate;
 
 @Configuration
 @EnableBatchProcessing
@@ -27,8 +34,12 @@ public class BatchStatConfig {
     private final CustomStepListener customStepListener;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final BatchStatisticService batchStatisticService;
+    private final StatVideoProcessor statVideoProcessor;
+    private final StatAdProcessor statAdProcessor;
+    private final EntityManagerFactory entityManagerFactory;
 
+
+    //240801 chunk
     @Bean
     public Job statVideoJob(Step statVideoStep) {
         return new JobBuilder("statVideoJob", jobRepository)
@@ -39,18 +50,15 @@ public class BatchStatConfig {
     }
 
     @Bean
-    public Step statVideoStep() {
+    public Step statVideoStep(@Qualifier("batchTaskExecutor") TaskExecutor taskExecutor) {
         return new StepBuilder("statVideoStep", jobRepository)
-                .tasklet(statVideoTasklet(), transactionManager).listener(customStepListener).build();
-    }
-
-    @Bean
-    public Tasklet statVideoTasklet() {
-        return (contribution, chunkContext) -> {
-            // 1일 비디오 통계
-            batchStatisticService.updateDailyViewVideo(LocalDate.now().minusDays(1));
-            return RepeatStatus.FINISHED;
-        };
+                .<Videos, StatisticVideo>chunk(500, transactionManager)
+                .reader(videoUpdateReader())
+                .processor(statVideoProcessor)
+                .writer(videoStatsJpaItemWriter())
+                .listener(customStepListener)
+                .taskExecutor(taskExecutor)
+                .build();
     }
 
     @Bean
@@ -63,17 +71,50 @@ public class BatchStatConfig {
     }
 
     @Bean
-    public Step statAdStep() {
+    public Step statAdStep(@Qualifier("batchTaskExecutor") TaskExecutor taskExecutor) {
         return new StepBuilder("statAdStep", jobRepository)
-                .tasklet(statAdTasklet(), transactionManager).listener(customStepListener).build();
+                .<VideoAd, StatisticAd>chunk(500, transactionManager)
+                .reader(adUpdateReader())
+                .processor(statAdProcessor)
+                .writer(adStatsJpaItemWriter())
+                .listener(customStepListener)
+                .taskExecutor(taskExecutor)
+                .build();
     }
 
     @Bean
-    public Tasklet statAdTasklet() {
-        return (contribution, chunkContext) -> {
-            // 1일 광고 통계
-            batchStatisticService.updateDailyViewAd(LocalDate.now().minusDays(1));
-            return RepeatStatus.FINISHED;
-        };
+    public JpaPagingItemReader<Videos> videoUpdateReader() {
+        return new JpaPagingItemReaderBuilder<Videos>()
+                .name("videoUpdateReader")
+                .entityManagerFactory(entityManagerFactory)
+                .queryString("SELECT v FROM Videos v")
+                .pageSize(10)
+                .saveState(false)
+                .build();
+    }
+
+    @Bean
+    public JpaItemWriter<StatisticVideo> videoStatsJpaItemWriter() {
+        JpaItemWriter<StatisticVideo> jpaItemWriter = new JpaItemWriter<>();
+        jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+        return jpaItemWriter;
+    }
+
+    @Bean
+    public JpaPagingItemReader<VideoAd> adUpdateReader() {
+        return new JpaPagingItemReaderBuilder<VideoAd>()
+                .name("videoUpdateReader")
+                .entityManagerFactory(entityManagerFactory)
+                .queryString("SELECT v FROM VideoAd v")
+                .pageSize(10)
+                .saveState(false)
+                .build();
+    }
+
+    @Bean
+    public JpaItemWriter<StatisticAd> adStatsJpaItemWriter() {
+        JpaItemWriter<StatisticAd> jpaItemWriter = new JpaItemWriter<>();
+        jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+        return jpaItemWriter;
     }
 }

@@ -2,16 +2,14 @@ package com.sparta.binplaybatch.batch.domain.statistic;
 
 import com.sparta.binplaybatch.entity.Videos;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
 
 @Entity
 @Getter
+@Setter
 @Table(name="statistic_video")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,8 +33,8 @@ public class StatisticVideo {
     @Column(name="daily_play_time", nullable = false)
     private int dailyPlayTime;
 
-    public void updateDailyViewAndPlayTime(long dailyViewCount,int dailyPlayTime) {
-        this.dailyViewCount = dailyViewCount;
+    public void updateDailyViewAndPlayTime(Long dailyViewCount, int dailyPlayTime) {
+        this.dailyViewCount = dailyViewCount.intValue();
         this.dailyPlayTime = dailyPlayTime;
     }
 }

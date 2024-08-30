@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface StatisticAdRepository extends JpaRepository<StatisticAd, StatisticAdId> {
+    //비디오 광고, 생성 날짜로 찾기
     Optional<StatisticAd> findByVideoAdAndCreatedAt(VideoAd videoAd, LocalDate createdAt);
-    List<StatisticAd> findByCreatedAt(LocalDate date);
-    //Optional<StatisticAd> findByVideoAdAndCreatedAt(Long videoAd, LocalDate createdAt);
 }

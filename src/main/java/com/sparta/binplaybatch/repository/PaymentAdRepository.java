@@ -13,11 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentAdRepository extends JpaRepository<PaymentAd, Long> {
-
-    //List<PaymentVideo> findAllByCreatedAt(LocalDate date);
-
+    //비디오 광고, 생성 날짜로 찾기
     Optional<PaymentAd> findByVideoAdAndCreatedAt(VideoAd videoAd, LocalDate date);
-
-    @Query("SELECT p FROM PaymentAd p WHERE p.createdAt = :date")
-    List<PaymentAd> findAllByCreatedAt(@Param("date") LocalDate date);
 }

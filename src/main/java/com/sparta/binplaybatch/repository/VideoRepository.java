@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface VideoRepository extends JpaRepository<Videos, Long> {
+    //모든 비디오 찾기
     List<Videos> findAll();
 }
